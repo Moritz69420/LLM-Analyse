@@ -13,79 +13,13 @@ os.environ["OPENROUTER_API_KEY"] = (
     "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"
 )
 API_KEY = "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"
-MODEL = "mistralai/mixtral-8x7b-instruct"
+
 
 SYSTEM_PROMPT = """You are a decision function.
                 Output ONLY valid JSON. No explanations, no extra text.
                 Return exactly one JSON object with this schema:
                 {"decision":"buy" or "sell","confidence":number between 0.0 and 1.0}
                 """
-irrelevant_facts = [
-    "Recent European equity markets have seen volatility related to shifting expectations about central bank interest rate policies in the U.S. and Eurozone, with investors closely monitoring upcoming Fed and ECB announcements. :contentReference[oaicite:0]{index=0}",
-    "The DAX has exhibited fluctuations as technical indicators suggest short-term overbought conditions, with mixed momentum signals. :contentReference[oaicite:1]{index=1}",
-    "Macro news regarding inflation and economic data releases in Germany influences investor sentiment about future corporate earnings. :contentReference[oaicite:2]{index=2}",
-    "German manufacturing activity showed signs of contraction in recent activity reports, which can feed into risk-off sentiment among equity traders. :contentReference[oaicite:3]{index=3}",
-    "Defense sector sentiment has supported some upside pressure across European indices amid geopolitical tensions and higher expected military spending. :contentReference[oaicite:4]{index=4}",
-    "Technical analysis shows the DAX attempting to break above long-term resistance levels, suggesting traders are watching key psychological price zones. :contentReference[oaicite:5]{index=5}",
-    "Broader European markets have recently traded near multi-week or record highs as investors rebalance portfolios ahead of central bank meetings. :contentReference[oaicite:6]{index=6}",
-    "Falling benchmark interest rate expectations tend to support higher valuation multiples for equities, which influences momentum in major stock indices. :contentReference[oaicite:7]{index=7}",
-    "Changes in commodity prices, such as energy or industrial metals, can disproportionately affect certain DAX components and overall index performance. :contentReference[oaicite:8]{index=8}",
-    "Record-setting performance in major indices often reflects macroeconomic optimism but also increased sensitivity to shifts in economic data. :contentReference[oaicite:9]{index=9}",
-    "Fiscal policy signals from Germany and the wider EU shape investor expectations about future growth prospects for domestic companies. :contentReference[oaicite:10]{index=10}",
-    "Cross-market influences from U.S. equity and bond yields have had spillover effects on European equities, including the DAX. :contentReference[oaicite:11]{index=11}",
-    "Sector leadership within the DAX can rotate rapidly, especially between cyclical sectors like autos and defensive sectors like healthcare, affecting short-term index dynamics. :contentReference[oaicite:12]{index=12}",
-    "Retail and institutional investor flows into or out of European equity ETFs contribute to intraday and short-term price patterns. :contentReference[oaicite:13]{index=13}",
-    "German business sentiment indices have shown improvement, which can bolster confidence in future corporate performance. :contentReference[oaicite:14]{index=14}",
-    "Risk assets like stocks have responded to geopolitical developments that affect global risk sentiment without necessarily altering economic fundamentals. :contentReference[oaicite:15]{index=15}",
-    "European banks and financial stocks have recently contributed to broader market gains, reflecting anticipated regulatory or policy changes. :contentReference[oaicite:16]{index=16}",
-    "Seasonally light trading volume around holidays tends to increase volatility and exaggerate short-term moves in major indices. :contentReference[oaicite:17]{index=17}",
-    "Currency movements between the euro and major currencies influence multinational earnings expectations of DAX-listed firms. :contentReference[oaicite:18]{index=18}",
-    "Trading strategies focused on technical breakouts are common around significant price levels in the DAX, affecting order flow. :contentReference[oaicite:19]{index=19}",
-    "Persistently low or steady interest rate expectations tend to support equity valuations, especially in sectors sensitive to financing costs. :contentReference[oaicite:20]{index=20}",
-    "Headlines related to economic growth data in the euro area have an impact on market positioning among global investors. :contentReference[oaicite:21]{index=21}",
-    "Performance data for individual heavyweight constituents of the index can skew short-term index moves even when macro conditions are stable. :contentReference[oaicite:22]{index=22}",
-    "Defensive sectors can act as a cushion in times of broader market uncertainty, influencing the index composition’s effect on overall movement. :contentReference[oaicite:23]{index=23}",
-    "Expectations for future corporate earnings revisions are a key input into how traders price stocks prior to earnings seasons. :contentReference[oaicite:24]{index=24}",
-    "Economic indicators like consumer confidence and business morale feed into medium-term equity valuations. :contentReference[oaicite:25]{index=25}",
-    "Risk sentiment among global investors often shifts with macroeconomic headlines even if the underlying data does not change materially. :contentReference[oaicite:26]{index=26}",
-    "Movements in growth-sensitive equity sectors often reflect changes in yield curves and expectations of future rate paths. :contentReference[oaicite:27]{index=27}",
-    "Market participants watch volatility indices that reflect future uncertainty expectations, influencing their risk-taking behavior. :contentReference[oaicite:28]{index=28}",
-    "Short-term technical price movements are often driven by liquidity conditions and algorithmic trading around key price levels. :contentReference[oaicite:29]{index=29}",
-]
-
-relevant_facts = [
-    "Recent European equity markets have seen volatility related to shifting expectations about central bank interest rate policies in the U.S. and Eurozone, with investors closely monitoring upcoming Fed and ECB announcements.",
-    "The DAX has exhibited fluctuations as technical indicators suggest short-term overbought conditions, with mixed momentum signals.",
-    "Macro news regarding inflation and economic data releases in Germany influences investor sentiment about future corporate earnings.",
-    "German manufacturing activity showed signs of contraction in recent activity reports, which can feed into risk-off sentiment among equity traders.",
-    "Defense sector sentiment has supported some upside pressure across European indices amid geopolitical tensions and higher expected military spending.",
-    "Technical analysis shows the DAX attempting to break above long-term resistance levels, suggesting traders are watching key psychological price zones.",
-    "Broader European markets have recently traded near multi-week or record highs as investors rebalance portfolios ahead of central bank meetings.",
-    "Falling benchmark interest rate expectations tend to support higher valuation multiples for equities, which influences momentum in major stock indices.",
-    "Changes in commodity prices, such as energy or industrial metals, can disproportionately affect certain DAX components and overall index performance.",
-    "Record-setting performance in major indices often reflects macroeconomic optimism but also increased sensitivity to shifts in economic data.",
-    "Fiscal policy signals from Germany and the wider EU shape investor expectations about future growth prospects for domestic companies.",
-    "Cross-market influences from U.S. equity and bond yields have had spillover effects on European equities, including the DAX.",
-    "Sector leadership within the DAX can rotate rapidly, especially between cyclical sectors like autos and defensive sectors like healthcare, affecting short-term index dynamics.",
-    "Retail and institutional investor flows into or out of European equity ETFs contribute to intraday and short-term price patterns.",
-    "German business sentiment indices have shown improvement, which can bolster confidence in future corporate performance.",
-    "Risk assets like stocks have responded to geopolitical developments that affect global risk sentiment without necessarily altering economic fundamentals.",
-    "European banks and financial stocks have recently contributed to broader market gains, reflecting anticipated regulatory or policy changes.",
-    "Seasonally light trading volume around holidays tends to increase volatility and exaggerate short-term moves in major indices.",
-    "Currency movements between the euro and major currencies influence multinational earnings expectations of DAX-listed firms.",
-    "Trading strategies focused on technical breakouts are common around significant price levels in the DAX, affecting order flow.",
-    "Persistently low or steady interest rate expectations tend to support equity valuations, especially in sectors sensitive to financing costs.",
-    "Headlines related to economic growth data in the euro area have an impact on market positioning among global investors.",
-    "Performance data for individual heavyweight constituents of the index can skew short-term index moves even when macro conditions are stable.",
-    "Defensive sectors can act as a cushion in times of broader market uncertainty, influencing the index compositions effect on overall movement.",
-    "Expectations for future corporate earnings revisions are a key input into how traders price stocks prior to earnings seasons.",
-    "Economic indicators like consumer confidence and business morale feed into medium-term equity valuations.",
-    "Risk sentiment among global investors often shifts with macroeconomic headlines even if the underlying data does not change materially.",
-    "Movements in growth-sensitive equity sectors often reflect changes in yield curves and expectations of future rate paths.",
-    "Market participants watch volatility indices that reflect future uncertainty expectations, influencing their risk-taking behavior.",
-    "Short-term technical price movements are often driven by liquidity conditions and algorithmic trading around key price levels.",
-]
-
 
 def dax_data():
     """
@@ -397,3 +331,95 @@ def plotting(decision_data: list):
 
 
 plotting(LLM_decisions_overall)
+
+modell = ["mistralai/mixtral-8x7b-instruct"] # TODO noch weitere Modelle hinzufügen
+infos = {"irrelevant_facts" : [
+    "Recent European equity markets have seen volatility related to shifting expectations about central bank interest rate policies in the U.S. and Eurozone, with investors closely monitoring upcoming Fed and ECB announcements. :contentReference[oaicite:0]{index=0}",
+    "The DAX has exhibited fluctuations as technical indicators suggest short-term overbought conditions, with mixed momentum signals. :contentReference[oaicite:1]{index=1}",
+    "Macro news regarding inflation and economic data releases in Germany influences investor sentiment about future corporate earnings. :contentReference[oaicite:2]{index=2}",
+    "German manufacturing activity showed signs of contraction in recent activity reports, which can feed into risk-off sentiment among equity traders. :contentReference[oaicite:3]{index=3}",
+    "Defense sector sentiment has supported some upside pressure across European indices amid geopolitical tensions and higher expected military spending. :contentReference[oaicite:4]{index=4}",
+    "Technical analysis shows the DAX attempting to break above long-term resistance levels, suggesting traders are watching key psychological price zones. :contentReference[oaicite:5]{index=5}",
+    "Broader European markets have recently traded near multi-week or record highs as investors rebalance portfolios ahead of central bank meetings. :contentReference[oaicite:6]{index=6}",
+    "Falling benchmark interest rate expectations tend to support higher valuation multiples for equities, which influences momentum in major stock indices. :contentReference[oaicite:7]{index=7}",
+    "Changes in commodity prices, such as energy or industrial metals, can disproportionately affect certain DAX components and overall index performance. :contentReference[oaicite:8]{index=8}",
+    "Record-setting performance in major indices often reflects macroeconomic optimism but also increased sensitivity to shifts in economic data. :contentReference[oaicite:9]{index=9}",
+    "Fiscal policy signals from Germany and the wider EU shape investor expectations about future growth prospects for domestic companies. :contentReference[oaicite:10]{index=10}",
+    "Cross-market influences from U.S. equity and bond yields have had spillover effects on European equities, including the DAX. :contentReference[oaicite:11]{index=11}",
+    "Sector leadership within the DAX can rotate rapidly, especially between cyclical sectors like autos and defensive sectors like healthcare, affecting short-term index dynamics. :contentReference[oaicite:12]{index=12}",
+    "Retail and institutional investor flows into or out of European equity ETFs contribute to intraday and short-term price patterns. :contentReference[oaicite:13]{index=13}",
+    "German business sentiment indices have shown improvement, which can bolster confidence in future corporate performance. :contentReference[oaicite:14]{index=14}",
+    "Risk assets like stocks have responded to geopolitical developments that affect global risk sentiment without necessarily altering economic fundamentals. :contentReference[oaicite:15]{index=15}",
+    "European banks and financial stocks have recently contributed to broader market gains, reflecting anticipated regulatory or policy changes. :contentReference[oaicite:16]{index=16}",
+    "Seasonally light trading volume around holidays tends to increase volatility and exaggerate short-term moves in major indices. :contentReference[oaicite:17]{index=17}",
+    "Currency movements between the euro and major currencies influence multinational earnings expectations of DAX-listed firms. :contentReference[oaicite:18]{index=18}",
+    "Trading strategies focused on technical breakouts are common around significant price levels in the DAX, affecting order flow. :contentReference[oaicite:19]{index=19}",
+    "Persistently low or steady interest rate expectations tend to support equity valuations, especially in sectors sensitive to financing costs. :contentReference[oaicite:20]{index=20}",
+    "Headlines related to economic growth data in the euro area have an impact on market positioning among global investors. :contentReference[oaicite:21]{index=21}",
+    "Performance data for individual heavyweight constituents of the index can skew short-term index moves even when macro conditions are stable. :contentReference[oaicite:22]{index=22}",
+    "Defensive sectors can act as a cushion in times of broader market uncertainty, influencing the index composition’s effect on overall movement. :contentReference[oaicite:23]{index=23}",
+    "Expectations for future corporate earnings revisions are a key input into how traders price stocks prior to earnings seasons. :contentReference[oaicite:24]{index=24}",
+    "Economic indicators like consumer confidence and business morale feed into medium-term equity valuations. :contentReference[oaicite:25]{index=25}",
+    "Risk sentiment among global investors often shifts with macroeconomic headlines even if the underlying data does not change materially. :contentReference[oaicite:26]{index=26}",
+    "Movements in growth-sensitive equity sectors often reflect changes in yield curves and expectations of future rate paths. :contentReference[oaicite:27]{index=27}",
+    "Market participants watch volatility indices that reflect future uncertainty expectations, influencing their risk-taking behavior. :contentReference[oaicite:28]{index=28}",
+    "Short-term technical price movements are often driven by liquidity conditions and algorithmic trading around key price levels. :contentReference[oaicite:29]{index=29}",],
+	"relevant_facts" : [
+    "Recent European equity markets have seen volatility related to shifting expectations about central bank interest rate policies in the U.S. and Eurozone, with investors closely monitoring upcoming Fed and ECB announcements.",
+    "The DAX has exhibited fluctuations as technical indicators suggest short-term overbought conditions, with mixed momentum signals.",
+    "Macro news regarding inflation and economic data releases in Germany influences investor sentiment about future corporate earnings.",
+    "German manufacturing activity showed signs of contraction in recent activity reports, which can feed into risk-off sentiment among equity traders.",
+    "Defense sector sentiment has supported some upside pressure across European indices amid geopolitical tensions and higher expected military spending.",
+    "Technical analysis shows the DAX attempting to break above long-term resistance levels, suggesting traders are watching key psychological price zones.",
+    "Broader European markets have recently traded near multi-week or record highs as investors rebalance portfolios ahead of central bank meetings.",
+    "Falling benchmark interest rate expectations tend to support higher valuation multiples for equities, which influences momentum in major stock indices.",
+    "Changes in commodity prices, such as energy or industrial metals, can disproportionately affect certain DAX components and overall index performance.",
+    "Record-setting performance in major indices often reflects macroeconomic optimism but also increased sensitivity to shifts in economic data.",
+    "Fiscal policy signals from Germany and the wider EU shape investor expectations about future growth prospects for domestic companies.",
+    "Cross-market influences from U.S. equity and bond yields have had spillover effects on European equities, including the DAX.",
+    "Sector leadership within the DAX can rotate rapidly, especially between cyclical sectors like autos and defensive sectors like healthcare, affecting short-term index dynamics.",
+    "Retail and institutional investor flows into or out of European equity ETFs contribute to intraday and short-term price patterns.",
+    "German business sentiment indices have shown improvement, which can bolster confidence in future corporate performance.",
+    "Risk assets like stocks have responded to geopolitical developments that affect global risk sentiment without necessarily altering economic fundamentals.",
+    "European banks and financial stocks have recently contributed to broader market gains, reflecting anticipated regulatory or policy changes.",
+    "Seasonally light trading volume around holidays tends to increase volatility and exaggerate short-term moves in major indices.",
+    "Currency movements between the euro and major currencies influence multinational earnings expectations of DAX-listed firms.",
+    "Trading strategies focused on technical breakouts are common around significant price levels in the DAX, affecting order flow.",
+    "Persistently low or steady interest rate expectations tend to support equity valuations, especially in sectors sensitive to financing costs.",
+    "Headlines related to economic growth data in the euro area have an impact on market positioning among global investors.",
+    "Performance data for individual heavyweight constituents of the index can skew short-term index moves even when macro conditions are stable.",
+    "Defensive sectors can act as a cushion in times of broader market uncertainty, influencing the index compositions effect on overall movement.",
+    "Expectations for future corporate earnings revisions are a key input into how traders price stocks prior to earnings seasons.",
+    "Economic indicators like consumer confidence and business morale feed into medium-term equity valuations.",
+    "Risk sentiment among global investors often shifts with macroeconomic headlines even if the underlying data does not change materially.",
+    "Movements in growth-sensitive equity sectors often reflect changes in yield curves and expectations of future rate paths.",
+    "Market participants watch volatility indices that reflect future uncertainty expectations, influencing their risk-taking behavior.",
+    "Short-term technical price movements are often driven by liquidity conditions and algorithmic trading around key price levels.",
+    ]
+}
+for MODEL in modelle:
+	for info in infos:
+		data = ask_LLM(iterations, version, infos)        # where version is either without infos (0), with extra  irrelevant infos (1), or with relevant info (3)
+      	plot(data, titel)
+        
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
