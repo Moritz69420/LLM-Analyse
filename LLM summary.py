@@ -188,9 +188,12 @@ def ask_LLM(iteration, iterations):
 
         # print(response_json)
         LLM_decisions_internal.append(response_json)
+		trading_days_optimal= sum(d["up"] for d in LLM_decisions_internal)
+		trading_days_actual = sum(1 for d in LLM_decisions_internal if d["decision"] == "buy")
         print_progress(i, total, start_time, iteration=iteration, iterations=iterations)
         save_to_text(i, LLM_decisions_internal)
     LLM_decisions_overall.append(LLM_decisions_internal)
+
 
 
 def save_to_text(iteration: int, data: list, path="llm_decisions.txt"):
