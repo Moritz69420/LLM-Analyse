@@ -189,15 +189,32 @@ def ask_LLM(iteration, iterations):
         # print(response_json)
         LLM_decisions_internal.append(response_json)
         print_progress(i, total, start_time, iteration=iteration, iterations=iterations)
+        save_to_text(i, LLM_decisions_internal)
     LLM_decisions_overall.append(LLM_decisions_internal)
 
+
+def save_to_text(iteration: int, data: list, path="llm_decisions.txt"):
+    import json
+    import os
+
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            store = json.load(f)
+    else:
+        store = {}
+	# aktuelle daten in store mit key der iteration setzten "1": [{...},{...}]
+    store[str(iteration)] = data  # JSON keys müssen strings sein
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(store, f, indent=2)
 
 LLM_decisions_overall = []
 iterations = 5
 
+
 for it in range(1, iterations + 1):
     ask_LLM(iteration=it, iterations=iterations)
-
+	
 
 ## Analysis
 
