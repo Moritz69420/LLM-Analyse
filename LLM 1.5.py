@@ -1,3 +1,14 @@
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import requests
+import json
+import time
+import sys
+import os
+
 API_KEY = os.getenv("OPENROUTER_API_KEY")  # <-- KEY NICHT hardcoden!
 if not API_KEY:
     raise RuntimeError("OPENROUTER_API_KEY is not set in environment variables.")
