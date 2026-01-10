@@ -150,65 +150,129 @@ def calibration_bins(preds, n_bins=10):
 
 
 # -------------------- PLOTTING --------------------
-def plotting(decision_data, title: str):
-    colors = [
-        "tab:blue",
-        "tab:orange",
-        "tab:green",
-        "tab:red",
-        "tab:purple",
-        "tab:brown",
+def plot_model_treatments_1x3(model_name: str, results_by_treatment: dict):
+    """
+    results_by_treatment:
+        {
+          "without information": decision_data,   # decision_data = List[List[dict]]  (runs)
+          "with irrelevant information": decision_data,
+          "with relevant information": decision_data
+        }
+
+    Creates ONE figure with 3 subplots (1x3), one per treatment, and model as suptitle.
+    """
+
+    treatments_order = [
+        "without information",
+        "with irrelevant information",
+        "with relevant information",
     ]
 
-    fig = plt.figure()
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharex=True, sharey=True)
 
-    for i, run in enumerate(decision_data):
-        x, emp, counts = calibration_bins(run, n_bins=10)
-        plt.scatter(
+    colors = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple", "tab:brown"]
+
+    for ax, treatment in zip(axes, treatments_order):
+        decision_data = results_by_treatment[treatment]  # List[runs]
+
+        # plot each run
+        for i, run in enumerate(decision_data):
+            x, emp, counts = calibration_bins(run, n_bins=10)
+            ax.scatter(
+                x,
+                emp,
+                s=counts * 20,
+                alpha=0.6,
+                color=colors[i % len(colors)],
+                label=f"run {i+1}",
+            )
+
+        # 45 degree line
+        ax.plot([0, 1], [0, 1], linestyle="--", color="gray", linewidth=1)
+
+        # pooled runs
+        all_preds = [pred for run in decision_data for pred in run]
+        x, emp, counts = calibration_bins(all_preds, n_bins=10)
+        ax.scatter(
             x,
             emp,
             s=counts * 20,
-            alpha=0.6,
-            color=colors[i % len(colors)],
-            label=f"run {i+1}",
+            alpha=0.9,
+            color="black",
+            edgecolors="white",
+            linewidths=0.6,
+            label="pooled",
         )
 
-    plt.plot([0, 1], [0, 1])
+        # metrics text per subplot
+        bs_list = [brier_score_run(run) for run in decision_data]
+        ece_list = [ece_run(run, n_bins=10) for run in decision_data]
+        
+        
+        # added trading days
+        trading_days = sum(pred["decision"] == "buy" for pred in decision_data)
+		market_up_days = sum(pred["gain"] == 1 for pred in decision_data)
+        ax.text(
+            0.02,
+            0.98,
+            f"ECE={np.mean(ece_list):.3f}\nBrier={np.mean(bs_list):.3f}",
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=9,
+        )
 
-    # all runs pooled
-    all_preds = [pred for run in decision_data for pred in run]
-    x, emp, counts = calibration_bins(all_preds, n_bins=10)
-    plt.scatter(
-        x,
-        emp,
-        s=counts * 20,
-        alpha=0.9,
-        color="black",
-        edgecolors="white",
-        linewidths=0.6,
-        label="all runs pooled",
-    )
+        ax.set_title(treatment)
+        ax.set_xlim(-0.05, 1.05)
+        ax.set_ylim(-0.05, 1.05)
+        ax.set_xlabel("Predicted probability (confidence)")
+        ax.set_ylabel("Empirical probability")
 
-    plt.legend(markerscale=0.7)
-    plt.xlabel("Predicted probability (confidence)")
-    plt.ylabel("Empirical probability (observed frequency)")
-    plt.title(f"Calibration curve — {title}")
-    plt.ylim(-0.05, 1.05)
-    plt.xlim(-0.05, 1.05)
+        ax.legend(markerscale=0.6, fontsize=8)
 
-    bs_list = [brier_score_run(run) for run in decision_data]
-    ece_list = [ece_run(run, n_bins=10) for run in decision_data]
-    fig.text(
-        0.5,
-        0.02,
-        f"ECE = {np.mean(ece_list):.3f} | Brier = {np.mean(bs_list):.3f}",
-        ha="center",
-        va="bottom",
-        fontsize=10,
-    )
-
-    plt.subplots_adjust(bottom=0.18)
+    fig.suptitle(f"Calibration curves — {model_name}", fontsize=16)
+    fig.tight_layout(rect=[0, 0.05, 1, 0.93])
     plt.show()
+
+
+def save_to_text(iteration: int, data: list, path="llm_decisions.txt"):
+    import json
+    import os
+
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            store = json.load(f)
+    else:
+        store = {}
+	# aktuelle daten in store mit key der iteration setzten "1": [{...},{...}]
+    store[str(iteration)] = data  # JSON keys müssen strings sein
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(store, f, indent=2)
+        
+        
+def eval_decisions(pred:list):
+    """
+    takes decision list of one model and evaluates the decision against the real values
+    """
+    	trading_days = sum(pred["decision"] == "buy" for pred in run)
+	market_up_days = sum(pred["gain"] == 1 for pred in run)
+
+	# „right trade“
+	trading_days = sum(
+  	        (pred["decision"] == "buy") and (pred["gain"] == 1)
+   		 	for pred in run
+		) 
+
+	# „right decsion“
+	correct_days = sum(
+    	(
+        (pred["decision"] == "buy" and pred["gain"] == 1)
+        or
+        (pred["decision"] == "sell" and pred["gain"] == 0)
+    	)
+    	for pred in run
+	)
 
 
 # -------------------- CORE EXPERIMENT --------------------
@@ -277,16 +341,35 @@ def ask_llm_run(model, iteration, iterations, treatment_facts=None):
             print("\033[31mERROR:\033[0m API credits exhausted")
             sys.exit(1)
 
-        raw = response.json()["choices"][0]["message"]["content"]
-        response_json = extract_json_by_braces(raw)
+        try:
+            raw = response.json()["choices"][0]["message"]["content"]
+            response_json = extract_json_by_braces(raw)
+	            
+	        response_json["date"] = date_str
+	        response_json["open"] = daily_val["open"]
+	        response_json["close"] = daily_val["close"]
+	        response_json["gain"] = daily_val["up"]
 
-        response_json["date"] = date_str
-        response_json["open"] = daily_val["open"]
-        response_json["close"] = daily_val["close"]
-        response_json["gain"] = daily_val["up"]
+	        # print(response_json)
+	        LLM_decisions_internal.append(response_json)
+			trading_days_optimal= sum(d["up"] for d in LLM_decisions_internal)
+			trading_days_actual = sum(1 for d in LLM_decisions_internal if d["decision"] == "buy")
+	        print_progress(i, total, start_time, iteration=iteration, iterations=iterations)
+	        save_to_text(i, LLM_decisions_internal)
+	        except Exception as e:
+            print("\n========= DEBUG ERROR =========")
+            print("Exception:", type(e).__name__)
+            print(f"Response: {response}")
+            print("Message:", e)
+            print("\n--- RAW MODEL OUTPUT ---")
+            print(raw)
+            print("\n--- PARSED JSON ---")
+            print(response_json)
+            print("================================\n")
+            raise
 
-        decisions_internal.append(response_json)
-        print_progress(i, total, start_time, iteration=iteration, iterations=iterations)
+    LLM_decisions_overall.append(LLM_decisions_internal)
+
 
     return decisions_internal
 
@@ -397,4 +480,4 @@ if __name__ == "__main__":
 
     for model, model_results in all_results.items():
         for title, decision_data in model_results.items():
-            plotting(decision_data, f"{model} — {title}")
+            plot_model_treatments_1x3(decision_data, f"{model} — {title}")
